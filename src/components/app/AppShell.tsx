@@ -5,7 +5,8 @@ import { Footer } from "@/components/landing/Footer";
 
 const links = [
   { to: "/jobs", label: "Jobs" },
-  { to: "/developers/dev_1", label: "Talent" },
+  { to: "/applications", label: "Applications" },
+  { to: "/messages", label: "Messages" },
   { to: "/pricing", label: "Pricing" },
 ];
 

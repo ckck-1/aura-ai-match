@@ -1,7 +1,7 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Star, MapPin, Clock, Briefcase, Sparkles } from "lucide-react";
+import { Star, MapPin, Clock, Briefcase, Sparkles, MessageSquare } from "lucide-react";
 import { AppShell } from "@/components/app/AppShell";
 import { api } from "@/lib/mock-api";
 
@@ -43,8 +43,10 @@ export default function DeveloperProfile() {
             </div>
           </div>
           <div className="flex flex-col gap-2 shrink-0">
-            <button className="btn-liquid !px-6">Hire {dev.name.split(" ")[0]}</button>
-            <button className="btn-ghost-liquid !px-6">Save</button>
+            <Link to="/messages/th_2" className="btn-liquid !px-6">
+              <MessageSquare className="size-4" /> Message
+            </Link>
+            <button className="btn-ghost-liquid !px-6">Hire {dev.name.split(" ")[0]}</button>
           </div>
         </div>
       </motion.section>

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Search, MapPin, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Search, MapPin, Sparkles, ArrowRight } from "lucide-react";
 import { AppShell } from "@/components/app/AppShell";
 import { api, ALL_TECH, Job } from "@/lib/mock-api";
 
@@ -105,12 +106,20 @@ const JobCard = ({ job, index }: { job: Job; index: number }) => (
         <div className="font-display text-2xl font-bold text-liquid">{job.matchScore}</div>
       </div>
     </div>
-    <div className="mt-5 flex flex-wrap gap-1.5">
-      {job.techStack.map((t) => (
-        <span key={t} className="text-[11px] px-2.5 py-1 rounded-full bg-muted/50 border border-border text-muted-foreground">
-          {t}
-        </span>
-      ))}
+    <div className="mt-5 flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex flex-wrap gap-1.5">
+        {job.techStack.map((t) => (
+          <span key={t} className="text-[11px] px-2.5 py-1 rounded-full bg-muted/50 border border-border text-muted-foreground">
+            {t}
+          </span>
+        ))}
+      </div>
+      <Link
+        to={`/jobs/${job._id}/apply`}
+        className="inline-flex items-center gap-1.5 text-xs font-medium px-4 py-2 rounded-full bg-foreground text-background hover:opacity-90 transition-opacity"
+      >
+        Apply <ArrowRight className="size-3.5" />
+      </Link>
     </div>
   </motion.article>
 );
