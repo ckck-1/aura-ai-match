@@ -134,3 +134,152 @@ export const api = {
 };
 
 export const ALL_TECH = TECH;
+
+// ===== Applications =====
+export interface Application {
+  _id: string;
+  jobId: string;
+  jobTitle: string;
+  company: string;
+  companyLogo: string;
+  coverLetter: string;
+  status: "submitted" | "in-review" | "interview" | "offer" | "rejected";
+  appliedAt: string;
+  matchScore: number;
+}
+
+const APPS_KEY = "nexus.applications";
+const loadApps = (): Application[] => {
+  try { return JSON.parse(localStorage.getItem(APPS_KEY) || "[]"); } catch { return []; }
+};
+const saveApps = (a: Application[]) => localStorage.setItem(APPS_KEY, JSON.stringify(a));
+
+// Seed a couple of mock applications on first load
+const seedApps = () => {
+  const existing = loadApps();
+  if (existing.length) return existing;
+  const seed: Application[] = [
+    {
+      _id: "app_seed_1", jobId: "job_3", jobTitle: JOBS[2].title, company: JOBS[2].startup.name,
+      companyLogo: JOBS[2].startup.logo, coverLetter: "Excited to bring my infra background to your team.",
+      status: "interview", appliedAt: "3d ago", matchScore: 92,
+    },
+    {
+      _id: "app_seed_2", jobId: "job_5", jobTitle: JOBS[4].title, company: JOBS[4].startup.name,
+      companyLogo: JOBS[4].startup.logo, coverLetter: "Full-stack with strong AI ops experience.",
+      status: "in-review", appliedAt: "6d ago", matchScore: 88,
+    },
+  ];
+  saveApps(seed);
+  return seed;
+};
+
+// ===== Chat =====
+export interface ChatMessage {
+  _id: string;
+  threadId: string;
+  from: "me" | "them";
+  authorName: string;
+  text: string;
+  at: string;
+}
+
+export interface ChatThread {
+  _id: string;
+  withName: string;
+  withRole: "developer" | "startup";
+  avatar: string;
+  subtitle: string;
+  lastMessage: string;
+  lastAt: string;
+  unread: number;
+}
+
+const THREADS: ChatThread[] = [
+  { _id: "th_1", withName: "Marcus Vale", withRole: "startup", avatar: "H", subtitle: "Helion Labs · Founder", lastMessage: "Loved your portfolio — can we chat tomorrow?", lastAt: "12m", unread: 2 },
+  { _id: "th_2", withName: "Aria Chen", withRole: "developer", avatar: "AC", subtitle: "Staff AI Engineer", lastMessage: "Sending over the inference benchmark now.", lastAt: "2h", unread: 0 },
+  { _id: "th_3", withName: "Priya N.", withRole: "startup", avatar: "L", subtitle: "Lumen AI · Head of Eng", lastMessage: "Offer is ready when you are 🚀", lastAt: "1d", unread: 1 },
+];
+
+const MSGS_KEY = "nexus.messages";
+const loadMsgs = (): Record<string, ChatMessage[]> => {
+  try { return JSON.parse(localStorage.getItem(MSGS_KEY) || "{}"); } catch { return {}; }
+};
+const saveMsgs = (m: Record<string, ChatMessage[]>) => localStorage.setItem(MSGS_KEY, JSON.stringify(m));
+
+const seedMsgs = () => {
+  const existing = loadMsgs();
+  if (Object.keys(existing).length) return existing;
+  const m: Record<string, ChatMessage[]> = {
+    th_1: [
+      { _id: "m1", threadId: "th_1", from: "them", authorName: "Marcus", text: "Hey! Saw your profile — your inference work is exactly what we need.", at: "10:02" },
+      { _id: "m2", threadId: "th_1", from: "me", authorName: "You", text: "Thanks Marcus, happy to dig in. What stack are you on today?", at: "10:14" },
+      { _id: "m3", threadId: "th_1", from: "them", authorName: "Marcus", text: "Loved your portfolio — can we chat tomorrow?", at: "10:48" },
+    ],
+    th_2: [
+      { _id: "m4", threadId: "th_2", from: "me", authorName: "You", text: "Sending over the inference benchmark now.", at: "08:30" },
+    ],
+    th_3: [
+      { _id: "m5", threadId: "th_3", from: "them", authorName: "Priya", text: "Offer is ready when you are 🚀", at: "Yesterday" },
+    ],
+  };
+  saveMsgs(m);
+  return m;
+};
+
+export const appsApi = {
+  async list(): Promise<Application[]> {
+    await wait(200);
+    return seedApps().sort((a, b) => (a.appliedAt > b.appliedAt ? -1 : 1));
+  },
+  async apply(input: { jobId: string; coverLetter: string }): Promise<Application> {
+    await wait(700);
+    const job = JOBS.find((j) => j._id === input.jobId) ?? JOBS[0];
+    const app: Application = {
+      _id: `app_${Date.now()}`,
+      jobId: job._id,
+      jobTitle: job.title,
+      company: job.startup.name,
+      companyLogo: job.startup.logo,
+      coverLetter: input.coverLetter,
+      status: "submitted",
+      appliedAt: "just now",
+      matchScore: job.matchScore,
+    };
+    const all = [app, ...loadApps()];
+    saveApps(all);
+    return app;
+  },
+  async getJob(id: string): Promise<Job | undefined> {
+    await wait(150);
+    return JOBS.find((j) => j._id === id);
+  },
+};
+
+export const chatApi = {
+  async listThreads(): Promise<ChatThread[]> {
+    await wait(200);
+    return THREADS;
+  },
+  async getThread(id: string): Promise<{ thread: ChatThread; messages: ChatMessage[] }> {
+    await wait(200);
+    const thread = THREADS.find((t) => t._id === id) ?? THREADS[0];
+    const msgs = seedMsgs()[thread._id] ?? [];
+    return { thread, messages: msgs };
+  },
+  async send(threadId: string, text: string): Promise<ChatMessage> {
+    await wait(120);
+    const msg: ChatMessage = {
+      _id: `m_${Date.now()}`,
+      threadId,
+      from: "me",
+      authorName: "You",
+      text,
+      at: "now",
+    };
+    const all = seedMsgs();
+    all[threadId] = [...(all[threadId] ?? []), msg];
+    saveMsgs(all);
+    return msg;
+  },
+};
