@@ -10,6 +10,9 @@ import Register from "./pages/Register.tsx";
 import Jobs from "./pages/Jobs.tsx";
 import DeveloperProfile from "./pages/DeveloperProfile.tsx";
 import Pricing from "./pages/Pricing.tsx";
+import ApplyJob from "./pages/ApplyJob.tsx";
+import Applications from "./pages/Applications.tsx";
+import Messages from "./pages/Messages.tsx";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +27,10 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/jobs" element={<Jobs />} />
+          <Route path="/jobs/:id/apply" element={<ApplyJob />} />
+          <Route path="/applications" element={<Applications />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/messages/:threadId" element={<Messages />} />
           <Route path="/developers/:id" element={<DeveloperProfile />} />
           <Route path="/pricing" element={<Pricing />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
