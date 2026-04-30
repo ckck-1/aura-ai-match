@@ -17,7 +17,7 @@ export const Hero = () => {
             className="inline-flex items-center gap-2 glass rounded-full px-3.5 py-1.5 text-xs text-muted-foreground mb-8"
           >
             <span className="size-1.5 rounded-full bg-accent animate-pulse" />
-            Mistral AI matching engine — live
+            DevDrop AI matching engine — live
           </motion.div>
 
           <motion.h1

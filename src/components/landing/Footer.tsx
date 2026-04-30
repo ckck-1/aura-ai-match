@@ -4,7 +4,7 @@ export const Footer = () => {
       <div className="container flex flex-wrap items-center justify-between gap-6">
         <div className="flex items-center gap-2.5">
           <div className="size-6 rounded-md bg-[var(--gradient-liquid)]" />
-          <span className="font-display font-bold tracking-widest text-xs">NEXUS</span>
+          <span className="font-display font-bold tracking-widest text-xs">DevDrop</span>
           <span className="text-xs text-muted-foreground ml-3">© 2026 — built quietly.</span>
         </div>
         <div className="flex gap-6 text-xs text-muted-foreground">

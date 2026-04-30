@@ -24,7 +24,7 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
         <nav className="mx-auto max-w-6xl flex items-center justify-between glass-strong rounded-full px-5 py-2.5">
           <Link to="/" className="flex items-center gap-2.5">
             <div className="size-7 rounded-lg bg-[var(--gradient-liquid)] shadow-[var(--shadow-glow)]" />
-            <span className="font-display font-bold tracking-widest text-sm">NEXUS</span>
+            <span className="font-display font-bold tracking-widest text-sm">DevDrop</span>
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             {links.map((l) => (

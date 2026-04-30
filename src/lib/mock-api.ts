@@ -148,7 +148,7 @@ export interface Application {
   matchScore: number;
 }
 
-const APPS_KEY = "nexus.applications";
+const APPS_KEY = "devdrop.applications";
 const loadApps = (): Application[] => {
   try { return JSON.parse(localStorage.getItem(APPS_KEY) || "[]"); } catch { return []; }
 };
@@ -201,7 +201,7 @@ const THREADS: ChatThread[] = [
   { _id: "th_3", withName: "Priya N.", withRole: "startup", avatar: "L", subtitle: "Lumen AI · Head of Eng", lastMessage: "Offer is ready when you are 🚀", lastAt: "1d", unread: 1 },
 ];
 
-const MSGS_KEY = "nexus.messages";
+const MSGS_KEY = "devdrop.messages";
 const loadMsgs = (): Record<string, ChatMessage[]> => {
   try { return JSON.parse(localStorage.getItem(MSGS_KEY) || "{}"); } catch { return {}; }
 };
