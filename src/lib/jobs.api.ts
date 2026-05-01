@@ -3,15 +3,35 @@ import type { Job } from "@/types/job";
 
 export const jobsApi = {
   list: async (params?: { q?: string; tech?: string }): Promise<Job[]> => {
-    // Matches your backend: res.json({ status: 'success', data: { jobs: [...] } })
     const res = await api.get("/api/v1/jobs/feed", { params });
     return res.data?.data?.jobs || [];
   },
 
-  apply: async (jobId: string) => {
-    // This hits: exports.applyToJob = async (req, res) => ...
+  
+
+ 
+
+  // Keep this if you still want the "Apply via DM" shortcut elsewhere
+  applyViaDM: async (jobId: string) => {
     const response = await api.post(`/api/v1/messages/apply/${jobId}`);
-    // We return the whole body which contains { thread, message }
     return response.data;
+  },
+
+  // Add these to your existing jobsApi object
+getById: async (jobId: string): Promise<Job> => {
+  try {
+    const res = await api.get(`/api/v1/jobs/${jobId}`);
+    // Check if the backend wraps the job in data.job or just data
+    return res.data?.data?.job || res.data?.data || res.data;
+  } catch (error) {
+    console.error("Error fetching job by ID:", error);
+    throw error;
   }
+},
+
+submitApplication: async (data: { jobId: string; coverLetter: string; resumeSnapshot: string }) => {
+  // Hits 'https://devdrop-ds91.onrender.com/api/v1/applications'
+  const res = await api.post("/api/v1/applications", data);
+  return res.data;
+}
 };

@@ -54,31 +54,10 @@ export default function Jobs() {
   );
 }
 
+// Inside JobCard in Jobs.tsx
 const JobCard = ({ job, index }: { job: Job; index: number }) => {
   const navigate = useNavigate();
-  const qc = useQueryClient();
   const startup = typeof job.startupId === "object" ? job.startupId : null;
-
-  const applyMutation = useMutation({
-    mutationFn: () => jobsApi.apply(job._id),
-    onSuccess: (res: any) => {
-      // Logic: res is the body. res.thread is the object. res.thread._id is the string.
-      const targetId = res?.thread?._id;
-
-      if (targetId) {
-        toast.success("Opening conversation...");
-        // Invalidate so the message list is current when we land
-        qc.invalidateQueries({ queryKey: ["threads"] });
-        navigate(`/messages/${targetId}`);
-      } else {
-        console.error("Missing thread ID in response:", res);
-        toast.error("Applied, but couldn't redirect.");
-      }
-    },
-    onError: (err: any) => {
-      toast.error(err.response?.data?.message || "Application failed");
-    }
-  });
 
   return (
     <motion.article
@@ -97,12 +76,12 @@ const JobCard = ({ job, index }: { job: Job; index: number }) => {
         </div>
       </div>
       
+      {/* Updated: Navigates to the apply page using the job's _id */}
       <button
-        onClick={() => applyMutation.mutate()}
-        disabled={applyMutation.isPending}
-        className="bg-foreground text-background px-6 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 hover:scale-105 transition-transform disabled:opacity-50"
+        onClick={() => navigate(`/jobs/${job._id}/apply`)}
+        className="bg-foreground text-background px-6 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 hover:scale-105 transition-transform"
       >
-        {applyMutation.isPending ? <Loader2 className="animate-spin size-3" /> : "Apply via DM"}
+        Apply Now
         <ArrowRight className="size-3" />
       </button>
     </motion.article>
