@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { FloatingCards } from "./FloatingCards";
+import { Link } from "react-router-dom";
 
 export const Hero = () => {
   return (
@@ -44,11 +45,12 @@ export const Hero = () => {
             transition={{ duration: 0.8, delay: 0.45 }}
             className="mt-10 flex flex-wrap gap-3"
           >
-            <button className="btn-liquid">
-              Find your next role
-              <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </button>
-            <button className="btn-ghost-liquid">Hire developers</button>
+            <Link to="/register" className="btn-liquid">
+                Find You Next Role
+              </Link>
+            <Link to="/register" className="btn-ghost-liquid">
+                Hire Developers
+              </Link>
           </motion.div>
 
           <motion.div
