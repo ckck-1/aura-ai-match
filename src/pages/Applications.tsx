@@ -99,57 +99,42 @@ const statusStyle: Record<Application["status"], string> = {
   rejected: "bg-destructive/15 text-destructive",
 };
 
-const ApplicationRow = ({
-  app,
-  index,
-}: {
-  app: Application;
-  index: number;
-}) => (
-  <motion.article
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{
-      delay: index * 0.05,
-      duration: 0.4,
-    }}
-    whileHover={{ y: -3 }}
-    className="glass-strong rounded-3xl p-6 flex flex-col md:flex-row md:items-center gap-5"
-  >
-    {/* LEFT */}
-    <div className="flex-1">
-      <h3 className="font-display text-lg font-semibold">
-        {typeof app.jobId === "object"
-          ? app.jobId.title
-          : "Job Application"}
-      </h3>
+const ApplicationRow = ({ app, index }: { app: Application; index: number }) => {
+  // Use the threadId for the link, fallback to messages dashboard if missing
+  const chatLink = app.threadId ? `/messages/${app.threadId}` : "/messages";
 
-      <p className="text-sm text-muted-foreground">
-        Applied • {new Date(app.createdAt).toDateString()}
-      </p>
-    </div>
-
-    {/* STATUS */}
-    <span
-      className={`text-xs px-3 py-1.5 rounded-full font-medium ${statusStyle[
-        app.status
-      ]}`}
+  const jobTitle = typeof app.jobId === "object" ? app.jobId.title : "Position";
+  
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className="glass-strong rounded-3xl p-6 flex flex-col md:flex-row md:items-center gap-5 border border-white/5"
     >
-      {app.status}
-    </span>
+      <div className="flex-1">
+        <h3 className="font-display text-lg font-semibold">{jobTitle}</h3>
+        <p className="text-sm text-muted-foreground">
+          Applied • {new Date(app.createdAt).toLocaleDateString()}
+        </p>
+      </div>
 
-    {/* ACTION */}
-    <Link
-      to="/messages"
-      className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-border hover:border-foreground/40"
-    >
-      <MessageSquare className="size-3.5" /> Message
-    </Link>
-  </motion.article>
-);
+      <div className="flex items-center gap-3">
+        <span className={`text-xs px-3 py-1.5 rounded-full font-medium ${statusStyle[app.status]}`}>
+          {app.status}
+        </span>
 
-/* ========================= */
-
+        <Link
+          to={chatLink}
+          className="inline-flex items-center gap-2 text-xs px-4 py-2 rounded-full border border-white/10 hover:bg-white/5 hover:border-white/20 transition-all"
+        >
+          <MessageSquare className="size-3.5 text-liquid" />
+          Message
+        </Link>
+      </div>
+    </motion.article>
+  );
+};
 const EmptyState = () => (
   <div className="glass-strong rounded-3xl p-12 text-center">
     <div className="font-display text-xl font-semibold">
