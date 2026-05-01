@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/lib/mock-api";
 import { toast } from "sonner";
 
 const COMMON_TECHS = ["React", "Node.js", "Python", "TypeScript", "Go", "Rust", "Java", "AWS", "Docker", "Kubernetes", "PostgreSQL", "MongoDB"];
@@ -42,7 +41,7 @@ export default function JobCreator() {
   const removeTech = (tech: string) => setForm({ ...form, techStack: form.techStack.filter(t => t !== tech) });
 
   const addReq = (req: string) => {
-    if (req && form.requirements.length < 10) {
+    if (req && !form.requirements.includes(req) && form.requirements.length < 10) {
       setForm({ ...form, requirements: [...form.requirements, req] });
     }
   };
@@ -51,15 +50,67 @@ export default function JobCreator() {
 
   const handlePublish = async () => {
     setLoading(true);
+
+    // 1. Extract Token from the 'devdrop_tokens' object
+    const savedTokens = localStorage.getItem('devdrop_tokens');
+    let token = "";
+
+    if (savedTokens) {
+      try {
+        const parsed = JSON.parse(savedTokens);
+        token = parsed.accessToken;
+      } catch (e) {
+        console.error("Token parsing error:", e);
+      }
+    }
+
+    if (!token) {
+      toast.error("You must be logged in to post a job.");
+      setLoading(false);
+      return;
+    }
+
+    // 2. Prepare Payload
+    const payload = {
+      title: form.title,
+      description: form.description,
+      techStack: form.techStack,
+      requirements: form.requirements,
+      salaryRange: {
+        min: Number(form.salaryMin),
+        max: Number(form.salaryMax),
+        currency: "USD"
+      },
+      jobType: form.type,
+      location: form.location
+    };
+
     try {
-      await api.createJob({
-        ...form,
-        salaryRange: { min: Number(form.salaryMin), max: Number(form.salaryMax), currency: "USD" }
+      // 3. Make Request to the versioned API path
+      const response = await fetch('https://devdrop-ds91.onrender.com/api/v1/jobs', {
+        method: 'POST',
+        headers: {
+          'accept': '*/*',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload),
       });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          toast.error("Session expired. Please log in again.");
+          return;
+        }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Server error: ${response.status}`);
+      }
+
       toast.success("Job posted successfully!");
       navigate("/startup/dashboard");
-    } catch (error) {
-      toast.error("Failed to post job");
+    } catch (error: any) {
+      console.error("Submission Error:", error);
+      toast.error(error.message || "Failed to post job. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -137,7 +188,7 @@ export default function JobCreator() {
                   </div>
                   Job Description
                 </CardTitle>
-                <p className="text-sm text-muted-foreground">Describe the role, responsibilities, and what makes your company unique.</p>
+                <p className="text-sm text-muted-foreground">Describe the role and responsibilities.</p>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 px-3 py-2 rounded-lg">
                   <Sparkles className="size-3" />
                   Markdown supported
@@ -151,7 +202,7 @@ export default function JobCreator() {
                   className="min-h-[200px] resize-none"
                 />
                 <div className="mt-2 text-xs text-muted-foreground">
-                  {form.description.length} characters
+                  {form.description.length} characters (min 50)
                 </div>
               </CardContent>
             </Card>
@@ -185,8 +236,7 @@ export default function JobCreator() {
                       value={tempTech}
                       onChange={(e) => setTempTech(e.target.value)}
                       placeholder="Add technology..."
-                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addReq(tempTech), setTempTech(""))}
-                      className="flex-1"
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTech(tempTech), setTempTech(""))}
                     />
                     <Button onClick={() => { addTech(tempTech); setTempTech(""); }} size="sm">
                       <Plus className="size-4" />
@@ -221,7 +271,6 @@ export default function JobCreator() {
                       onChange={(e) => setTempReq(e.target.value)}
                       placeholder="Add a requirement..."
                       onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addReq(tempReq), setTempReq(""))}
-                      className="flex-1"
                     />
                     <Button onClick={() => { addReq(tempReq); setTempReq(""); }} size="sm">
                       <Plus className="size-4" />
@@ -266,30 +315,32 @@ export default function JobCreator() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="text-xs uppercase tracking-widest text-muted-foreground mb-2 block">Location</label>
-                  <select
-                    value={form.location}
-                    onChange={(e) => setForm({ ...form, location: e.target.value })}
-                    className="w-full bg-muted/30 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  >
-                    <option value="Remote">Remote</option>
-                    <option value="Hybrid">Hybrid</option>
-                    <option value="In-person">In-person</option>
-                  </select>
-                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs uppercase tracking-widest text-muted-foreground mb-2 block">Location</label>
+                    <select
+                      value={form.location}
+                      onChange={(e) => setForm({ ...form, location: e.target.value })}
+                      className="w-full bg-muted/30 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="Remote">Remote</option>
+                      <option value="Hybrid">Hybrid</option>
+                      <option value="In-person">In-person</option>
+                    </select>
+                  </div>
 
-                <div>
-                  <label className="text-xs uppercase tracking-widest text-muted-foreground mb-2 block">Job Type</label>
-                  <select
-                    value={form.type}
-                    onChange={(e) => setForm({ ...form, type: e.target.value })}
-                    className="w-full bg-muted/30 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  >
-                    <option value="full-time">Full-time</option>
-                    <option value="contract">Contract</option>
-                    <option value="part-time">Part-time</option>
-                  </select>
+                  <div>
+                    <label className="text-xs uppercase tracking-widest text-muted-foreground mb-2 block">Job Type</label>
+                    <select
+                      value={form.type}
+                      onChange={(e) => setForm({ ...form, type: e.target.value })}
+                      className="w-full bg-muted/30 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="full-time">Full-time</option>
+                      <option value="contract">Contract</option>
+                      <option value="part-time">Part-time</option>
+                    </select>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -310,7 +361,7 @@ export default function JobCreator() {
         {step < 4 ? (
           <Button onClick={() => setStep(s => s + 1)} disabled={!isValidStep()} className="btn-liquid">
             Continue
-            <ArrowRight className="size-4" />
+            <ArrowRight className="size-4 ml-2" />
           </Button>
         ) : (
           <Button onClick={handlePublish} disabled={loading || !isValidStep()} className="btn-liquid">
