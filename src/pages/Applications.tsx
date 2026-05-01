@@ -22,6 +22,7 @@ const STAGE_LABEL: Record<Application["status"], string> = {
   accepted: "Accepted",
 };
 
+
 export default function Applications() {
   const {
     data: apps = [],

@@ -23,22 +23,36 @@ export default function ApplyJob() {
 
   // 2. Application Mutation hitting your POST /api/v1/applications
   const applyMutation = useMutation({
-    mutationFn: () =>
-      jobsApi.submitApplication({
-        jobId: id!,
-        coverLetter: cover,
-        resumeSnapshot: "Current Profile Snapshot", // Pass user's current resume state here
-      }),
-    onSuccess: () => {
-      toast.success("Application sent!", {
-        description: "The startup team has been notified.",
-      });
-      navigate("/applications");
-    },
-    onError: (err: any) => {
-      toast.error(err.response?.data?.message || "Submission failed");
-    },
-  });
+  mutationFn: () => {
+    if (!job?._id) {
+      throw new Error("Job ID missing");
+    }
+
+    return jobsApi.submitApplication({
+      jobId: job._id, // ✅ FIXED HERE
+      coverLetter: cover,
+      resumeSnapshot: "Current Profile Snapshot",
+    });
+  },
+
+  onSuccess: () => {
+    toast.success("Application sent!", {
+      description: "The startup team has been notified.",
+    });
+    navigate("/applications");
+  },
+
+  onError: (err: any) => {
+    console.error("🔥 FULL ERROR:", err.response?.data);
+
+    toast.error(
+      err.response?.data?.message ||
+      JSON.stringify(err.response?.data) ||
+      err.message ||
+      "Submission failed"
+    );
+  },
+});
 
   // Helper to handle the startupId union type safely
   const startup = job && typeof job.startupId === "object" ? job.startupId : null;
