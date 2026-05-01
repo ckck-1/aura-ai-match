@@ -7,15 +7,19 @@ import { Footer } from "@/components/landing/Footer";
 
 const Index = () => {
   return (
-    <main className="relative min-h-screen bg-background text-foreground">
-      <Nav />
-      <Hero />
-      <Marquee />
-      <ExplodingFeatures />
-      <CTA />
-      <Footer />
+    <main className="relative min-h-screen bg-background text-foreground overflow-x-hidden">
+      <div className="relative overflow-x-hidden">
+        <Nav />
+        <Hero />
+        <Marquee />
+        <ExplodingFeatures />
+        <CTA />
+        <Footer />
+      </div>
     </main>
   );
 };
 
 export default Index;
+
+
